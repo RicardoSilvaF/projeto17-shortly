@@ -33,3 +33,19 @@ export async function getUrlById(req,res){
         res.status(500).send(error.message);
     }
 }
+
+export async function getShortened(req,res){
+    const { shortUrl } = req.params;
+    try{
+        const search = await db.query(`SELECT * FROM "shortenedURLs" WHERE "shortenedUrl" = $1`, [shortUrl]);
+        if (search.rowCount === 0){
+            return res.sendStatus(404);
+        }
+
+        await db.query(`UPDATE "shortenedURLs" SET "visitCounter" = "visitCounter" + 1 WHERE "shortenedUrl" = $1`, [shortUrl]);
+        return res.redirect(search.rows[0].url);
+    }
+    catch(error){
+        res.status(500).send(error.message);
+    }
+}
