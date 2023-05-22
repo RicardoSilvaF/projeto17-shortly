@@ -40,3 +40,35 @@ export async function postSignIn (req,res){
         res.status(500).send(error.message);
     }
 }
+
+export async function userProfile (req,res){
+    const { userId } = res.locals.session;
+
+    try{
+        const user = await db.query(`SELECT * FROM users WHERE id = $1`, [userId]);
+        if(!user){
+            return res.sendStatus(401);
+        }
+        const links = await db.query(`SELECT * FROM "shortenedURLs" WHERE "userId" = $1`, [userId]); 
+        const total_visits = await db.query(`SELECT SUM("visitCounter") AS total_visits FROM "shortenedURLs" WHERE "userId" = $1`, [userId]);
+        const linkList = links.rows.map((row) => {
+            return {
+              id: row.id,
+              shortUrl: row.shortenedUrl,
+              url: row.url,
+              visitCount: row.visitCounter
+            }
+          })
+        
+        const profile = {
+            id: userId,
+            name: user.rows[0].name,
+            visitCount: total_visits.rows[0].total_visits,
+            shortenedUrls: linkList
+        }
+        return res.status(200).send(profile);
+    }
+    catch(error){
+        res.status(500).send(error.message);
+    }
+}
