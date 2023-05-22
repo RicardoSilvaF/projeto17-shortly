@@ -11,3 +11,7 @@ export const signinSchema = joi.object({
     email: joi.string().email().required().min(1),
     password: joi.string().required().min(1)
 })
+
+export const urlSchema = joi.object({
+    url: joi.string().required().uri()
+});
