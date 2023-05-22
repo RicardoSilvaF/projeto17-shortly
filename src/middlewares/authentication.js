@@ -1,6 +1,6 @@
 import { db } from "../database/database.connection.js";
 
-export async function shortenURLAuthenticate(req, res, next){
+export async function authenticate(req, res, next){
     const { authorization } = req.headers
     const token = authorization?.replace("Bearer ", '')
     if(!token){

@@ -49,3 +49,26 @@ export async function getShortened(req,res){
         res.status(500).send(error.message);
     }
 }
+
+export async function deleteUrl(req,res){
+    const { id } = req.params;
+    const { userId } = res.locals.session;
+    try{
+        if(!userId){
+            return res.sendStatus(401);
+        }
+        const urlTable = await db.query(`SELECT * FROM "shortenedURLs" WHERE id = $1`, [id]);
+        if(!urlTable.rows[0].userId){
+            return res.sendStatus(404);
+        }
+        if(urlTable.rows[0].userId !== userId){
+            return res.sendStatus(401);
+        }
+
+        await db.query(`DELETE FROM "shortenedURLs" WHERE id = $1`, [id]);
+        return res.sendStatus(204);
+    }
+    catch(error){
+        res.status(500).send(error.message);
+    }
+}
